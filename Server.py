@@ -1,25 +1,37 @@
-import socket
+from flask import Flask, request, jsonify
 
-HOST = ''  # kosong artinya listen di semua interface (gunakan IP laptop server)
-PORT = 5000  # bebas, tapi pastikan belum dipakai aplikasi lain
+app = Flask(__name__)
 
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind((HOST, PORT))
-server_socket.listen(1)
 
-print(f"Server berjalan di port {PORT}, menunggu koneksi...")
+@app.route('/api/request/cek-saldo', methods=['POST'])
+def handle_request():
+    try:
+        # Get the JSON data from the request
+        data = request.get_json()
+        # saldo = data.get('saldo', 0)
+        # nominal_transaksi = data.get('nominal_transaksi', 0)
+        # saldo_akhir = saldo - nominal_transaksi
+       
+        # Process the data here (add your business logic)
+        # For example:
+        response_data = {
+            'status': 'success',
+            'message': 'Request processed successfully',
+            'received_data': data,
+            'news': 'halo budi data kamu sudah kami terima',
+            # 'saldo': saldo,
+            'nominal_transaksi': data.get('nominal_transaksi', 0),
+            # 'saldo_akhir': saldo_akhir,
+           
+        }
+        return jsonify(response_data), 200
+   
+    except Exception as e:
+        error_response = {
+            'status': 'error',
+            'message': str(e)
+        }
+        return jsonify(error_response), 400
 
-conn, addr = server_socket.accept()
-print(f"Terhubung dengan client: {addr}")
-
-while True:
-    data = conn.recv(1024).decode()
-    if not data:
-        break
-    print(f"Pesan dari client: {data}")
-
-    balasan = input("Balas ke client: ")
-    conn.send(balasan.encode())
-
-conn.close()
-server_socket.close()
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
